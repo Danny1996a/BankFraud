@@ -1,0 +1,81 @@
+#caricamento pacchetti necessari
+library(fBasics)
+library(tseries)
+library(fUnitRoots)
+library(forecast)
+library(seastests)
+
+
+#cambio directory
+setwd("C:/Users/140165/OneDrive/Desktop/Università")
+dir()
+
+load("dati_settembre_2022.txt")
+ts(Y)
+Y
+plot(Y, type = "line", xlab="Time", ylab="Value", col="red", main="Serie storica economica")
+acf(Y, main="Correlogramma" ,col="red")
+
+#eseguiamo un po di statistiche descrittive sul modello
+summary(Y)
+basicStats(Y)
+#essendo che l'intervallo LCL Mean e UCL Mean non contiene al suo interno lo zero
+#la media risulta essere significativamente diversa da zero
+#lo Skewness positivo ci indica la presenza di asimmetria positiva
+#La Kurtosi indica il grado di appiattimento o sovra-elevamento della serie rispetto alla normale
+#essendo negativo ci sta ad indicare che la serie risulta essere platicurtica
+
+
+#Andiamo ora ad effettuare il test di radice unitaria
+#indicando come ipotesi alternativa la stazionarieta
+adf.test(Y, alternative = "stationary")
+#in questo caso indichiamo come ipotesi alternativa l'esplosivit 
+adf.test(Y, alternative = "explosive")
+
+#Vediamo ora un test similare al test di Dickey-Fuller
+#il pp.test
+pp.test(Y, alternative = "stationary")
+pp.test(Y, alternative = "explosive")
+
+#il test kpss.test
+kpss.test(Y)
+
+
+
+
+
+
+
+
+
+
+
+
+
+d<-ndiffs(Y, test = "adf")
+d
+
+
+
+Y_d2<-diff(Y, diff=d)
+plot(Y_d2, type = "line", col="green", ylab="Value", xlab="Time", main="Serie storica differenziata")
+adf.test(Y_d2, alternative = "stationary")
+adf.test(Y_d2, alternative = "explosive")
+
+isSeasonal(Y_d2, freq = 8)
+
+#utilizzando l'operatore di differenziazione due volte siamo riusciti a rendere la serie stazionaria
+
+acf(Y_d2, lag=50, main="Correlogramma serie storica differenziata" ,col="green")
+
+
+#il correlogramma denota come in corrispondenza di lag pari a 2,4,6,8,10 ecc le variabili siano correlate
+lag.plot(Y_d2)
+#ipotizzando che sia una serie bimestrale andiamo a differenziare tale serie per un d pari a 2 cercando di eliminare anche la correlazione verticale
+Y_finale<-diff(Y_d2, 4)
+plot(Y_finale, type="line")
+acf(Y_finale, lag=30)
+
+
+
+
